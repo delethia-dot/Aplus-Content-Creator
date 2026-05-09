@@ -254,6 +254,10 @@
           step2Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
+        document.addEventListener('coverAnalysisComplete', function (event) {
+          window.coverBrief = event.detail || null;
+        });
+
         function collectStep3Inputs(fallbackCategory) {
           var titleInput = document.getElementById('step1-title');
           var authorInput = document.getElementById('step1-author');
@@ -262,13 +266,12 @@
           var descInput = document.getElementById('step1-description');
           var seriesToggle = document.querySelector('.step1__toggle-input');
           var heatField = document.querySelector('[data-field="heat-level"]');
-          var moodEl = document.querySelector('[data-brief="mood-descriptor"]');
 
           var category = (genreInput && genreInput.value) || fallbackCategory || '';
           var heatVisible = heatField && !heatField.classList.contains('step1__field--hidden');
           var heatLevel = heatVisible && heatInput ? heatInput.value.trim() : '';
           var seriesStatus = seriesToggle && seriesToggle.checked ? 'series' : 'standalone';
-          var coverMood = moodEl ? moodEl.textContent.trim() : '';
+          var coverMood = (window.coverBrief && window.coverBrief.moodDescriptor) || '';
 
           var intakeAnswers = [];
           var fields = document.querySelectorAll('.step2__question-field');

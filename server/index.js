@@ -112,6 +112,102 @@ app.post('/api/generate', async (req, res) => {
   }
 });
 
+const COVER_SYSTEM_PROMPT =
+  'You are an expert book cover analyst. Analyze the provided book cover image and return a JSON object only with no markdown and no commentary. The JSON must contain exactly these fields: dominantColor, accentColor, backgroundTone, moodDescriptor, typographyStyle, imageryStyle, settingCue, genreSignalMatch. For dominantColor and accentColor return a plain English color description not a hex code. For backgroundTone return one of: dark, light, midtone, or gradient. For moodDescriptor return one word only. For typographyStyle return one of: serif, script, sans-serif, hand-lettered, or mixed. For imageryStyle return one of: illustrated, photographic, typographic-only, or painterly. For settingCue return a brief phrase describing any visible or implied setting. For genreSignalMatch return one of: matches, possible-mismatch, or unclear.';
+
+app.post('/api/analyze-cover', async (req, res) => {
+  const { imageBase64, mimeType } = req.body || {};
+
+  if (typeof imageBase64 !== 'string' || !imageBase64.trim()) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      message: 'Field "imageBase64" is required and must be a non-empty base64 string.',
+    });
+  }
+
+  if (typeof mimeType !== 'string' || !mimeType.trim()) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      message: 'Field "mimeType" is required (e.g. image/jpeg, image/png).',
+    });
+  }
+
+  try {
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: 1024,
+      system: COVER_SYSTEM_PROMPT,
+      cache_control: { type: 'ephemeral' },
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mimeType,
+                data: imageBase64,
+              },
+            },
+            {
+              type: 'text',
+              text: 'Analyze this book cover and return only the JSON object as specified.',
+            },
+          ],
+        },
+      ],
+    });
+
+    const text = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('')
+      .trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (_parseErr) {
+      return res.status(400).json({
+        error: 'invalid_response',
+        message: 'Cover analysis response was not valid JSON.',
+        raw: text,
+      });
+    }
+
+    return res.json(parsed);
+  } catch (err) {
+    if (err instanceof Anthropic.AuthenticationError) {
+      return res.status(401).json({
+        error: 'authentication_error',
+        message: 'Anthropic rejected the API key. Check ANTHROPIC_API_KEY.',
+      });
+    }
+    if (err instanceof Anthropic.PermissionDeniedError) {
+      return res.status(403).json({ error: 'permission_denied', message: err.message });
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      return res.status(429).json({ error: 'rate_limit_error', message: err.message });
+    }
+    if (err instanceof Anthropic.BadRequestError) {
+      return res.status(400).json({ error: 'bad_request', message: err.message });
+    }
+    if (err instanceof Anthropic.APIError) {
+      return res.status(err.status || 502).json({
+        error: 'api_error',
+        status: err.status,
+        message: err.message,
+      });
+    }
+    console.error('[analyze-cover] Unexpected error:', err);
+    return res.status(500).json({
+      error: 'internal_error',
+      message: 'Unexpected server error. Check server logs.',
+    });
+  }
+});
+
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: err.message });

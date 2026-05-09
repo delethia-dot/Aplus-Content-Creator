@@ -152,7 +152,64 @@ const step2Styles = `
     outline: 2px solid var(--v-bg);
     outline-offset: 3px;
   }
+  .step2__cover-loading {
+    margin: 0;
+    font-style: italic;
+    color: var(--v-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .step2__cover-error {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .step2__cover-error-text {
+    margin: 0;
+    color: var(--v-bg);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .step2__cover-retry {
+    background: var(--v-bg);
+    color: var(--v-text);
+    border: none;
+    border-radius: 999px;
+    padding: 0.55rem 1.2rem;
+    font-family: 'Work Sans', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .step2__cover-retry:hover { filter: brightness(1.1); }
 `;
+
+function step2FileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const result = String(reader.result || '');
+      const commaIdx = result.indexOf(',');
+      resolve(commaIdx >= 0 ? result.slice(commaIdx + 1) : result);
+    };
+    reader.onerror = function () {
+      reject(reader.error || new Error('FileReader failed'));
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const STEP2_COVER_FIELD_MAP = {
+  'dominant-color': 'dominantColor',
+  'accent-color': 'accentColor',
+  'background-tone': 'backgroundTone',
+  'mood-descriptor': 'moodDescriptor',
+  'typography-style': 'typographyStyle',
+  'imagery-style': 'imageryStyle',
+  'setting-cue': 'settingCue',
+  'genre-signal-match': 'genreSignalMatch',
+};
 
 function injectStep2Styles() {
   if (document.getElementById(STEP2_STYLE_ID)) return;
@@ -213,6 +270,94 @@ function createStep2Analysis(options) {
       </div>
     `;
     root.appendChild(partA);
+    runCoverAnalysis(partA, coverFile);
+  }
+
+  function runCoverAnalysis(partAEl, file) {
+    const briefContainer = partAEl.querySelector('.step2__brief');
+    const briefList = briefContainer.querySelector('.step2__brief-list');
+    const apiUrl = (window.APLUS_API_URL || '').replace('/api/generate', '/api/analyze-cover');
+
+    function clearTransientNodes() {
+      const oldLoading = briefContainer.querySelector('.step2__cover-loading');
+      if (oldLoading) oldLoading.remove();
+      const oldError = briefContainer.querySelector('.step2__cover-error');
+      if (oldError) oldError.remove();
+    }
+
+    function showLoading() {
+      clearTransientNodes();
+      briefList.style.display = 'none';
+      const loadingEl = document.createElement('p');
+      loadingEl.className = 'step2__cover-loading';
+      loadingEl.textContent = 'Analyzing cover image. This may take a moment.';
+      briefContainer.appendChild(loadingEl);
+    }
+
+    function showSuccess(brief) {
+      clearTransientNodes();
+      briefList.style.display = '';
+
+      Object.keys(STEP2_COVER_FIELD_MAP).forEach((dataKey) => {
+        const responseKey = STEP2_COVER_FIELD_MAP[dataKey];
+        const cell = briefContainer.querySelector('[data-brief="' + dataKey + '"]');
+        if (cell) cell.textContent = brief[responseKey] != null ? String(brief[responseKey]) : '';
+      });
+
+      if (brief.genreSignalMatch === 'possible-mismatch') {
+        const badge = briefContainer.querySelector('[data-genre-warning]');
+        if (badge) badge.hidden = false;
+      }
+
+      document.dispatchEvent(new CustomEvent('coverAnalysisComplete', {
+        detail: brief,
+      }));
+    }
+
+    function showError() {
+      clearTransientNodes();
+      briefList.style.display = 'none';
+      const wrap = document.createElement('div');
+      wrap.className = 'step2__cover-error';
+      const msg = document.createElement('p');
+      msg.className = 'step2__cover-error-text';
+      msg.textContent = 'Cover analysis failed. You can continue without it.';
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'step2__cover-retry';
+      retry.textContent = 'Retry';
+      retry.addEventListener('click', runAnalysis);
+      wrap.appendChild(msg);
+      wrap.appendChild(retry);
+      briefContainer.appendChild(wrap);
+    }
+
+    async function runAnalysis() {
+      showLoading();
+      try {
+        const base64 = await step2FileToBase64(file);
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: base64,
+            mimeType: file.type || 'image/jpeg',
+          }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || typeof data !== 'object') {
+          console.error('[step2] cover analysis non-success', res.status, data);
+          showError();
+          return;
+        }
+        showSuccess(data);
+      } catch (err) {
+        console.error('[step2] cover analysis failed:', err);
+        showError();
+      }
+    }
+
+    runAnalysis();
   }
 
   const partB = document.createElement('div');
