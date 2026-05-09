@@ -29,7 +29,7 @@ app.use(cors({
 
 app.options('*', cors());
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '10mb' }));
 
 app.post('/api/generate', async (req, res) => {
   const { prompt, systemPrompt } = req.body || {};
