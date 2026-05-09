@@ -267,6 +267,28 @@ const step6Styles = `
   }
   .step6__copy-btn:hover { filter: brightness(0.96); }
   .step6__copy-btn--copied { background: var(--v-accent-2); }
+  .step6__full-prompt-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .step6__rebuild-btn {
+    background: var(--v-bg);
+    color: var(--v-text);
+    border: none;
+    border-radius: 999px;
+    padding: 0.5rem 1.1rem;
+    font-family: 'Work Sans', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .step6__rebuild-btn:hover { filter: brightness(1.1); }
+  .step6__rebuild-btn:focus-visible {
+    outline: 2px solid var(--v-accent);
+    outline-offset: 2px;
+  }
   .step6__canva-notes {
     margin: 0;
     font-style: italic;
@@ -471,7 +493,10 @@ function createStep6Prompts(options) {
       <section class="step6__section">
         <label class="step6__section-title">Complete Image Prompt — Copy and paste this into your image generation tool</label>
         <textarea class="step6__full-prompt" data-layer="fullPrompt" spellcheck="true">${step6EscapeHtml(state.fullPrompt)}</textarea>
-        <button type="button" class="step6__copy-btn" data-copy="fullPrompt">Copy to Clipboard</button>
+        <div class="step6__full-prompt-actions">
+          <button type="button" class="step6__rebuild-btn" data-rebuild>Re-assemble from Layers</button>
+          <button type="button" class="step6__copy-btn" data-copy="fullPrompt">Copy to Clipboard</button>
+        </div>
       </section>
 
       <section class="step6__section">
@@ -524,7 +549,30 @@ function createStep6Prompts(options) {
       });
     });
 
+    // Wire the Re-assemble from Layers button
+    const rebuildBtn = body.querySelector('[data-rebuild]');
+    if (rebuildBtn) {
+      rebuildBtn.addEventListener('click', () => rebuildFullPromptFromLayers(idx));
+    }
+
     checkContinueState();
+  }
+
+  function rebuildFullPromptFromLayers(idx) {
+    const state = moduleStates[idx];
+    const card = state.cardEl;
+    if (!card) return;
+    const parts = STEP6_LAYER_ORDER.map(([key]) => {
+      const el = card.querySelector('.step6__layer-value[data-layer="' + key + '"]');
+      const value = el ? (el.textContent || '').trim() : '';
+      // Keep state in sync with whatever the user has in the layer rows right now
+      state[key] = value;
+      return value;
+    }).filter((v) => v.length > 0);
+    const assembled = parts.join(' ');
+    state.fullPrompt = assembled;
+    const textarea = card.querySelector('[data-layer="fullPrompt"]');
+    if (textarea) textarea.value = assembled;
   }
 
   function buildUserPrompt(idx) {
@@ -641,8 +689,26 @@ function createStep6Prompts(options) {
     document.dispatchEvent(new CustomEvent('step6-complete', { detail: imagePrompts }));
   });
 
-  // Fire all 5 in parallel
-  Promise.all(moduleStates.map((_, idx) => generatePrompt(idx)));
+  // Fire the 5 generations with at most 3 in flight at any time.
+  // Workers pull from a shared queue; as each finishes, the worker
+  // grabs the next pending module until the queue is empty.
+  const STEP6_CONCURRENCY = 3;
+  const queue = moduleStates.map((_, idx) => idx);
+  async function runWorker() {
+    while (queue.length > 0) {
+      const idx = queue.shift();
+      try {
+        await generatePrompt(idx);
+      } catch (err) {
+        // generatePrompt already surfaces errors to its own card
+        console.error('[step6] worker caught unexpected error:', err);
+      }
+    }
+  }
+  const workerCount = Math.min(STEP6_CONCURRENCY, moduleStates.length);
+  for (let i = 0; i < workerCount; i++) {
+    runWorker();
+  }
 
   return root;
 }
