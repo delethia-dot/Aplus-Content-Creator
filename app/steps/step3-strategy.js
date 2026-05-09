@@ -69,7 +69,7 @@ const step3Styles = `
   .step3__placeholder {
     margin: 0;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 1rem;
     line-height: 1.55;
   }
@@ -78,7 +78,7 @@ const step3Styles = `
   .step3__loading {
     margin: 0;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 1rem;
     line-height: 1.55;
   }

@@ -55,7 +55,7 @@ const step4Styles = `
   .step4__loading {
     margin: 0;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 1rem;
     line-height: 1.55;
   }
@@ -144,7 +144,7 @@ const step4Styles = `
   .step4__option-rationale {
     margin: 0;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 0.9rem;
     line-height: 1.5;
   }
@@ -350,9 +350,14 @@ function createStep4Layout(options) {
         setError();
         return;
       }
+      const cleaned = data.text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
       let parsed;
       try {
-        parsed = JSON.parse(data.text);
+        parsed = JSON.parse(cleaned);
       } catch (parseErr) {
         console.error('[step4] JSON parse failed:', parseErr, data.text);
         setError();

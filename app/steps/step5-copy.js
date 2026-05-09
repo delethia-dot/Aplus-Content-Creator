@@ -55,7 +55,7 @@ const step5Styles = `
   .step5__intro {
     margin: 0 0 0.5rem;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 0.9rem;
     line-height: 1.5;
   }
@@ -106,7 +106,7 @@ const step5Styles = `
   .step5__card-loading {
     margin: 0;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 0.95rem;
     line-height: 1.5;
   }
@@ -175,7 +175,7 @@ const step5Styles = `
   }
   .step5__field-value--designnote {
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 0.95rem;
   }
   .step5__counter {
@@ -419,9 +419,14 @@ function createStep5Copy(options) {
         setCardError(idx);
         return;
       }
+      const cleaned = data.text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
       let parsed;
       try {
-        parsed = JSON.parse(data.text);
+        parsed = JSON.parse(cleaned);
       } catch (parseErr) {
         console.error(`[step5] module ${idx + 1} JSON parse failed`, parseErr, data.text);
         setCardError(idx);

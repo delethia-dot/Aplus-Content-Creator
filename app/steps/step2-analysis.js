@@ -138,7 +138,7 @@ const step2Styles = `
   .step2__intake-hint {
     margin: 0 0 0.5rem;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 0.9rem;
     line-height: 1.5;
   }
@@ -162,7 +162,7 @@ const step2Styles = `
   .step2__cover-loading {
     margin: 0;
     font-style: italic;
-    color: var(--v-muted);
+    color: #7a3a47;
     font-size: 0.95rem;
     line-height: 1.5;
   }
