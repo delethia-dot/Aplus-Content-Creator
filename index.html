@@ -211,6 +211,7 @@
     <script defer src="app/steps/step3-strategy.js"></script>
     <script defer src="app/steps/step4-layout.js"></script>
     <script defer src="app/steps/step5-copy.js"></script>
+    <script defer src="app/steps/step6-prompts.js"></script>
   </head>
   <body>
     <div class="app-root">
@@ -353,6 +354,33 @@
 
         document.addEventListener('step4-complete', function (event) {
           mountStep5(event.detail || window.selectedLayout || null);
+        });
+
+        function mountStep6() {
+          var existing = document.getElementById('step6-mount');
+          if (existing) existing.remove();
+
+          var inputs = collectStep3Inputs('');
+          var layout = window.selectedLayout || null;
+
+          var step6Mount = document.createElement('div');
+          step6Mount.id = 'step6-mount';
+          document.querySelector('.app-root').appendChild(step6Mount);
+          step6Mount.appendChild(createStep6Prompts({
+            title: inputs.title,
+            author: inputs.author,
+            category: inputs.category,
+            heatLevel: inputs.heatLevel,
+            salesIntent: layout && layout.salesIntent ? layout.salesIntent : '',
+            coverBrief: window.coverBrief || null,
+            moduleCopy: Array.isArray(window.moduleCopy) ? window.moduleCopy : [],
+          }));
+
+          step6Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.addEventListener('step5-complete', function () {
+          mountStep6();
         });
 
         document.addEventListener('step1-complete', function (event) {
