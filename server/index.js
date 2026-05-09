@@ -112,6 +112,11 @@ app.post('/api/generate', async (req, res) => {
   }
 });
 
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: err.message });
+});
+
 app.listen(PORT, () => {
   console.log(`A+ Content Creator backend listening on http://localhost:${PORT}`);
   console.log(`Model: ${MODEL}  |  Max tokens: ${MAX_TOKENS}`);
