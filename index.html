@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Amazon A+ Content Creator — Ink & Prosper LLC</title>
     <script>
-      // Railway-hosted backend
-      window.APLUS_API_URL = 'https://aplus-content-creator-production.up.railway.app/api/generate';
+      // Same-origin path — Netlify proxies /api/* to the Railway backend (see netlify.toml).
+      window.APLUS_API_URL = '/api/generate';
     </script>
     <link rel="stylesheet" href="app/styles/main.css" />
     <style>
