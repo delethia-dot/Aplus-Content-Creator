@@ -25,7 +25,7 @@ export const INTAKE_QUESTIONS = {
     'What is the emotional promise?',
     'What makes the relationship sweet or heartwarming?',
     'Is the setting part of the appeal?',
-    'Are there family, faith, friendship, or community themes?',
+    'Are there family, faith, friendship, or community themes? If yes, describe which ones and how they show up in the story.',
     'What should not be spoiled?',
   ],
   [CATEGORIES.ROMANTIC_SUSPENSE]: [

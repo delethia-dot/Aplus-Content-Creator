@@ -135,6 +135,13 @@ const step2Styles = `
     border-radius: 8px;
     background: var(--v-muted);
   }
+  .step2__intake-hint {
+    margin: 0 0 0.5rem;
+    font-style: italic;
+    color: var(--v-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
   .step2__continue {
     align-self: flex-start;
     background: var(--v-accent);
@@ -378,12 +385,17 @@ function createStep2Analysis(options) {
         .join('')
     : `<div class="step2__fallback">No questions found for this genre. Please contact support.</div>`;
 
+  const partBHint = questions
+    ? `<p class="step2__intake-hint">For each question below, please describe your answer in detail. The more specific you are, the more tailored your A+ content will be.</p>`
+    : '';
+
   partB.innerHTML = `
     <header class="step2__header">
       <p class="step2__eyebrow">Step 2 of 7</p>
-      <h2 class="step2__title">Trope and Theme Selector</h2>
+      <h2 class="step2__title">Trope and Theme Details</h2>
     </header>
     <div class="step2__body">
+      ${partBHint}
       ${partBBody}
     </div>
   `;

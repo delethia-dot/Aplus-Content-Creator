@@ -287,7 +287,7 @@ function createStep1Intake() {
       </div>
 
       <div class="step1__field" data-required-field="description">
-        <label class="step1__label" for="step1-description">Book description<span class="step1__required">*</span></label>
+        <label class="step1__label" for="step1-description">Book / Series Description<span class="step1__required">*</span></label>
         <textarea class="step1__textarea" id="step1-description" name="description" required></textarea>
         <span class="step1__field-error" data-required-error hidden>This field is required.</span>
       </div>
