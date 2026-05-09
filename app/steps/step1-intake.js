@@ -85,12 +85,6 @@ const styles = `
     outline-offset: 1px;
     border-color: var(--v-bg);
   }
-  .step1__counter {
-    align-self: flex-end;
-    font-size: 0.8rem;
-    color: var(--v-bg);
-    opacity: 0.75;
-  }
   .step1__toggle {
     display: inline-flex;
     align-items: center;
@@ -294,8 +288,7 @@ function createStep1Intake() {
 
       <div class="step1__field" data-required-field="description">
         <label class="step1__label" for="step1-description">Book description<span class="step1__required">*</span></label>
-        <textarea class="step1__textarea" id="step1-description" name="description" required placeholder="1 to 3 sentences."></textarea>
-        <span class="step1__counter" data-counter>0 characters</span>
+        <textarea class="step1__textarea" id="step1-description" name="description" required></textarea>
         <span class="step1__field-error" data-required-error hidden>This field is required.</span>
       </div>
 
@@ -333,8 +326,6 @@ function createStep1Intake() {
   const form = root.querySelector('form');
   const genreSelect = root.querySelector('#step1-genre');
   const heatField = root.querySelector('[data-field="heat-level"]');
-  const descTextarea = root.querySelector('#step1-description');
-  const counter = root.querySelector('[data-counter]');
   const toggleInput = root.querySelector('.step1__toggle-input');
   const toggleText = root.querySelector('[data-toggle-text]');
   const fileInput = root.querySelector('#step1-cover');
@@ -408,10 +399,6 @@ function createStep1Intake() {
       const heatError = heatField.querySelector('[data-required-error]');
       if (heatError) heatError.hidden = true;
     }
-  });
-
-  descTextarea.addEventListener('input', () => {
-    counter.textContent = `${descTextarea.value.length} characters`;
   });
 
   toggleInput.addEventListener('change', () => {

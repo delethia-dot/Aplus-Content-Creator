@@ -1,8 +1,21 @@
 const STEP3_STYLE_ID = 'step3-strategy-styles';
 const STEP3_API_URL = window.APLUS_API_URL || 'http://localhost:3001/api/generate';
 
-const STEP3_SYSTEM_PROMPT =
-  "You are an expert Amazon A+ content strategist for authors. You specialize in clean and sweet romance, romantic suspense, cozy mystery, journals, nonfiction short reads, workbooks, and children's books. You write strategy briefs that explain exactly why specific A+ modules and copy approaches are recommended for a given book. Always explain your reasoning. Never just generate without explaining why.";
+const STEP3_SYSTEM_PROMPT = [
+  "You are an expert Amazon A+ content strategist for authors. You specialize in clean and sweet romance, romantic suspense, cozy mystery, journals, nonfiction short reads, workbooks, and children's books. You think in modules, sales intent, and buyer psychology. Every recommendation you make is specific to the book in front of you, never generic.",
+  '',
+  'Before writing anything, classify the book into one of these primary sales intents: Emotional Experience, Series Binge, Practical Outcome, Guided Reflection, Hands-On Implementation, Parent Teacher Buyer Fit, Giftable Product, Author Authority, or World Setting Immersion.',
+  '',
+  'Then apply category-specific extraction logic. For romance: identify tropes, couple dynamic, emotional promise, setting appeal, and no-spoiler boundaries. For journals: identify use case, transformation, gifting potential, and visual mood. For nonfiction: identify reader pain point, framework or method, author authority, and practical takeaways. For workbooks: identify learning objective, exercises, implementation path, and reader progress markers. For cozy mystery: identify the sleuth, setting charm, recurring comfort elements, and series binge potential. For children’s books: identify age range, theme or lesson, buyer type, and illustration style.',
+  '',
+  'Your strategy brief must recommend a specific 5-module stack based on the sales intent and category logic. Name each module and explain why it was chosen for this specific book.',
+  '',
+  'All recommendations must comply with Amazon A+ content rules. Never suggest pricing, customer review quotes, competitor comparisons, external links, or unsubstantiated superlative claims like best or number one.',
+  '',
+  'If the author is using a pen name or is a faceless brand, recommend thematic or setting-based visuals instead of author headshots. Suggest mood banners, illustrated settings, or brand logo treatments instead.',
+  '',
+  'Always explain your reasoning. The why behind every recommendation is as important as the recommendation itself.',
+].join('\n');
 
 const step3Styles = `
   .step3 {
@@ -245,27 +258,49 @@ function createStep3Strategy(options) {
     briefContent.appendChild(wrap);
   }
 
+  function deriveFacelessAuthorFlag(cat) {
+    if (cat === 'Journals' || cat === 'Nonfiction Short Reads') {
+      return 'possible (genre frequently uses pen names or brand-only authors)';
+    }
+    return 'unknown — evaluate based on whether the author name aligns with the book description tone';
+  }
+
   function buildUserPrompt() {
     const lines = [];
-    lines.push(`Book Title: ${title || '(not provided)'}`);
-    lines.push(`Author Name: ${author || '(not provided)'}`);
-    lines.push(`Genre Category: ${category || '(not provided)'}`);
+    lines.push('You are analyzing the following book for Amazon A+ content strategy.');
+    lines.push('');
+
+    if (title) lines.push(`Book Title: ${title}`);
+    if (author) lines.push(`Author Name: ${author}`);
+    if (category) lines.push(`Genre Category: ${category}`);
+
+    const intentForCategory =
+      typeof SALES_INTENTS !== 'undefined' && SALES_INTENTS[category]
+        ? SALES_INTENTS[category]
+        : '';
+    if (intentForCategory) {
+      lines.push(`Primary Sales Intent to Evaluate: ${intentForCategory}`);
+    }
+
     if (heatLevel) lines.push(`Heat Level: ${heatLevel}`);
-    lines.push(`Book Description: ${description || '(not provided)'}`);
-    lines.push(`Series Status: ${seriesStatus || '(not provided)'}`);
-    if (coverMood) lines.push(`Cover Mood Descriptor: ${coverMood}`);
+    if (description) lines.push(`Book Description: ${description}`);
+    if (seriesStatus) lines.push(`Part of a Series: ${seriesStatus}`);
+    if (coverMood) lines.push(`Cover Mood: ${coverMood}`);
+
+    lines.push(`Faceless or Pen Name Author: ${deriveFacelessAuthorFlag(category)}`);
+
     if (intakeAnswers.length) {
       lines.push('');
-      lines.push('Author Intake Responses:');
       intakeAnswers.forEach((qa) => {
-        lines.push(`Q: ${qa.question}`);
-        lines.push(`A: ${qa.answer}`);
+        lines.push(`${qa.question}: ${qa.answer}`);
       });
     }
+
     lines.push('');
     lines.push(
-      'Write a strategy brief of 2 to 3 paragraphs that explains the recommended A+ content approach for this book and why. Be specific to this book, not generic.'
+      'Based on all of the above, first state the confirmed Sales Intent classification and explain why. Then write a strategy brief of 2 to 3 paragraphs recommending the A+ content approach for this book. Then list the recommended 5-module stack with one sentence explaining why each module was chosen. Be specific to this book. Never be generic.'
     );
+
     return lines.join('\n');
   }
 
