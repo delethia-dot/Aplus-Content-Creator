@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+.app-root {
+  --v-bg:          #6f1830;  /* Primary brand color, dark surfaces */
+  --v-surface:     #fff7ea;  /* Page and card backgrounds */
+  --v-text:        #fff7ea;  /* Text on dark backgrounds */
+  --v-muted:       #f2d8c7;  /* Secondary text, muted elements */
+  --v-accent:      #f3c65b;  /* Primary CTA, highlights */
+  --v-soft:        #b99584;  /* Borders, dividers, soft UI */
+  --v-accent-2:    #a9b48d;  /* Secondary accent, sage */
+  --v-button-text: #47101e;  /* Text on accent buttons */
+}

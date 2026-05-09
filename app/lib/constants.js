@@ -1,0 +1,133 @@
+export const CATEGORIES = {
+  CLEAN_SWEET_ROMANCE: 'Clean / Sweet Romance',
+  ROMANTIC_SUSPENSE: 'Romantic Suspense',
+  COZY_MYSTERY: 'Cozy Mystery',
+  JOURNALS: 'Journals',
+  NONFICTION_SHORT_READS: 'Nonfiction Short Reads',
+  WORKBOOKS: 'Workbooks',
+  CHILDRENS_BOOKS: "Children's Books",
+};
+
+export const SALES_INTENTS = {
+  [CATEGORIES.CLEAN_SWEET_ROMANCE]: 'Reader Trust + Emotional Payoff',
+  [CATEGORIES.ROMANTIC_SUSPENSE]: 'Tension + Connection',
+  [CATEGORIES.COZY_MYSTERY]: 'Series Binge + World Comfort',
+  [CATEGORIES.JOURNALS]: 'Guided Reflection + Giftability',
+  [CATEGORIES.NONFICTION_SHORT_READS]: 'Practical Outcome + Author Authority',
+  [CATEGORIES.WORKBOOKS]: 'Hands-On Implementation',
+  [CATEGORIES.CHILDRENS_BOOKS]: 'Parent/Teacher Buyer Fit + Story Experience',
+};
+
+export const INTAKE_QUESTIONS = {
+  [CATEGORIES.CLEAN_SWEET_ROMANCE]: [
+    'Is this standalone or series?',
+    'What is the central romance trope?',
+    'What is the emotional promise?',
+    'What makes the relationship sweet or heartwarming?',
+    'Is the setting part of the appeal?',
+    'Are there family, faith, friendship, or community themes?',
+    'What should not be spoiled?',
+  ],
+  [CATEGORIES.ROMANTIC_SUSPENSE]: [
+    'What is the suspense element?',
+    'What is the romantic relationship dynamic?',
+    'Is the danger external, emotional, or criminal?',
+    'What can be teased without spoiling?',
+    'What is the tone: light, moderate, or intense suspense?',
+    'Does the cover lean romance, suspense, or both?',
+  ],
+  [CATEGORIES.COZY_MYSTERY]: [
+    'Who is the sleuth?',
+    'What is the setting?',
+    'What makes the mystery cozy, not dark?',
+    'Is there a recurring community hook (pet, bakery, bookstore)?',
+    'Is this part of a series?',
+    'What recurring elements should be featured?',
+  ],
+  [CATEGORIES.JOURNALS]: [
+    'What type of journal is this?',
+    'Who is it for?',
+    'What problem or desire does it support?',
+    'Is it guided or blank?',
+    'How many pages?',
+    'What sections are inside?',
+    'Is it giftable?',
+  ],
+  [CATEGORIES.NONFICTION_SHORT_READS]: [
+    'What problem does the book solve?',
+    'Who is the reader?',
+    'What will they understand or be able to do after reading?',
+    'What is the framework or method?',
+    'What makes the author credible?',
+    'Are there worksheets, checklists, or action steps?',
+  ],
+  [CATEGORIES.WORKBOOKS]: [
+    'What is the workbook designed to help the reader do?',
+    'Is it tied to a course, book, or coaching program?',
+    'What sections are included?',
+    'Are there worksheets, trackers, templates, checklists?',
+    'What is the intended use: daily, weekly, project-based, self-paced?',
+    'Can sample pages be shown?',
+  ],
+  [CATEGORIES.CHILDRENS_BOOKS]: [
+    'What age range?',
+    'Is it picture book, early reader, chapter book, or read-aloud?',
+    'What is the theme or lesson?',
+    'What makes it fun for children?',
+    'What makes it meaningful for adults?',
+    'What illustration style is used?',
+    'Can interior spreads be shown?',
+  ],
+};
+
+export const MODULE_STACKS = {
+  [CATEGORIES.CLEAN_SWEET_ROMANCE]: [
+    'Hero banner with emotional hook',
+    'Character or couple dynamic module',
+    'Tropes / readers-who-love section',
+    'Setting or small-town world module',
+    'Series reading order or author promise',
+  ],
+  [CATEGORIES.ROMANTIC_SUSPENSE]: [
+    'Hero banner with tension and emotional hook',
+    'Stakes module',
+    'Character / couple trust module',
+    'Setting or mystery atmosphere module',
+    'Series comparison chart or next-book module',
+  ],
+  [CATEGORIES.COZY_MYSTERY]: [
+    'Cozy world banner',
+    'Meet the sleuth module',
+    'Clues and charm module',
+    'Series reading order chart',
+    'For readers who love module',
+  ],
+  [CATEGORIES.JOURNALS]: [
+    'Hero banner with use-case promise',
+    'Inside-the-journal feature module',
+    'How to use it module',
+    'Who it is for module',
+    'Gift or lifestyle module',
+  ],
+  [CATEGORIES.NONFICTION_SHORT_READS]: [
+    'Problem-to-solution hero banner',
+    "What you'll learn module",
+    'Framework or method module',
+    'Inside the book module',
+    'Author credibility or reader-fit module',
+  ],
+  [CATEGORIES.WORKBOOKS]: [
+    'Outcome/use-case hero banner',
+    'Inside pages/features module',
+    'Step-by-step process module',
+    'Who it is for module',
+    'Companion product or author/program module',
+  ],
+  [CATEGORIES.CHILDRENS_BOOKS]: [
+    'Bright story-world hero banner',
+    'Learning/theme module',
+    'Inside the book module',
+    'Perfect-for module (bedtime, classroom, gifts)',
+    'Author/series module',
+  ],
+};

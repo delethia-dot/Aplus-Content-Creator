@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"/Users/delethiajohnson/Downloads/APlus_Content_App_Build_Spec_v2.docx\")",
+      "Read(//Users/delethiajohnson/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/38b526ce-4cb5-4144-aa7a-e6d13171ffe7/324b6d8d-8053-4b4d-ae82-bc3cb106169d/skills/docx/**)",
+      "Bash(extract-text \"/Users/delethiajohnson/Downloads/APlus_Content_App_Build_Spec_v2.docx\")",
+      "Bash(python '/Users/delethiajohnson/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/38b526ce-4cb5-4144-aa7a-e6d13171ffe7/324b6d8d-8053-4b4d-ae82-bc3cb106169d/skills/docx/scripts/office/unpack.py' /Users/delethiajohnson/Downloads/APlus_Content_App_Build_Spec_v2.docx /tmp/spec_unpacked/)",
+      "Bash(python3 __TRACKED_VAR__/scripts/office/unpack.py /Users/delethiajohnson/Downloads/APlus_Content_App_Build_Spec_v2.docx /tmp/spec_unpacked/)",
+      "Read(//private/tmp/spec_unpacked/word/**)",
+      "Bash(python3 -c ' *)",
+      "Read(//tmp/**)",
+      "Bash(node --check app/lib/constants.js)",
+      "Bash(node --check app/lib/compliance.js)",
+      "Bash(node --check app/steps/step1-intake.js)",
+      "Bash(mkdir -p \"/Users/delethiajohnson/Desktop/The A+ Content Builder/.claude\")",
+      "mcp__Claude_Preview__preview_start",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(npm install *)",
+      "Read(//Users/delethiajohnson/.nvm/versions/**)",
+      "Read(//Applications/**)",
+      "Read(//Users/delethiajohnson/.nvm/**)",
+      "Read(//Users/delethiajohnson/**)"
+    ]
+  }
+}

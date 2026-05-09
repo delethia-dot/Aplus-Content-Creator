@@ -1,0 +1,111 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import Anthropic from '@anthropic-ai/sdk';
+
+const apiKey = process.env.ANTHROPIC_API_KEY;
+if (!apiKey || apiKey === 'your_key_here') {
+  console.error(
+    'Missing ANTHROPIC_API_KEY in environment. Set it in server/.env or your shell before starting.'
+  );
+  process.exit(1);
+}
+
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-4-7';
+const MAX_TOKENS = Number(process.env.ANTHROPIC_MAX_TOKENS) || 16000;
+const PORT = process.env.PORT || 3001;
+
+const client = new Anthropic({ apiKey });
+const app = express();
+
+// CORS — allow all origins for local development. The frontend runs on a
+// different port (or file://) than the backend, so the browser will block
+// requests without these headers. Lock this down before deploying.
+app.use(cors({ origin: '*' }));
+app.use(express.json({ limit: '1mb' }));
+
+app.post('/api/generate', async (req, res) => {
+  const { prompt, systemPrompt } = req.body || {};
+
+  if (typeof prompt !== 'string' || !prompt.trim()) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      message: 'Field "prompt" is required and must be a non-empty string.',
+    });
+  }
+
+  if (systemPrompt !== undefined && systemPrompt !== null && typeof systemPrompt !== 'string') {
+    return res.status(400).json({
+      error: 'invalid_request',
+      message: 'Field "systemPrompt" must be a string when provided.',
+    });
+  }
+
+  const params = {
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'high' },
+    messages: [{ role: 'user', content: prompt }],
+  };
+
+  if (typeof systemPrompt === 'string' && systemPrompt.trim()) {
+    params.system = systemPrompt;
+    params.cache_control = { type: 'ephemeral' };
+  }
+
+  try {
+    const response = await client.messages.create(params);
+
+    const text = response.content
+      .filter((block) => block.type === 'text')
+      .map((block) => block.text)
+      .join('');
+
+    return res.json({
+      text,
+      stop_reason: response.stop_reason,
+      stop_details: response.stop_details ?? null,
+      model: response.model,
+      usage: {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+        cache_creation_input_tokens: response.usage.cache_creation_input_tokens,
+        cache_read_input_tokens: response.usage.cache_read_input_tokens,
+      },
+    });
+  } catch (err) {
+    if (err instanceof Anthropic.AuthenticationError) {
+      return res.status(401).json({
+        error: 'authentication_error',
+        message: 'Anthropic rejected the API key. Check ANTHROPIC_API_KEY.',
+      });
+    }
+    if (err instanceof Anthropic.PermissionDeniedError) {
+      return res.status(403).json({ error: 'permission_denied', message: err.message });
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      return res.status(429).json({ error: 'rate_limit_error', message: err.message });
+    }
+    if (err instanceof Anthropic.BadRequestError) {
+      return res.status(400).json({ error: 'bad_request', message: err.message });
+    }
+    if (err instanceof Anthropic.APIError) {
+      return res.status(err.status || 502).json({
+        error: 'api_error',
+        status: err.status,
+        message: err.message,
+      });
+    }
+    console.error('[generate] Unexpected error:', err);
+    return res.status(500).json({
+      error: 'internal_error',
+      message: 'Unexpected server error. Check server logs.',
+    });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`A+ Content Creator backend listening on http://localhost:${PORT}`);
+  console.log(`Model: ${MODEL}  |  Max tokens: ${MAX_TOKENS}`);
+});

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amazon A+ Content Creator — Ink & Prosper LLC</title>
+    <script>
+      // Replace this URL with your Railway backend URL after deployment
+      window.APLUS_API_URL = 'http://localhost:3001/api/generate';
+    </script>
+    <link rel="stylesheet" href="app/styles/main.css" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Work Sans', system-ui, sans-serif;
+      }
+      .app-root {
+        min-height: 100vh;
+        background: var(--v-surface);
+        color: var(--v-bg);
+      }
+      .preview-next-btn {
+        align-self: flex-start;
+        margin-top: 0.5rem;
+        background: var(--v-accent-2);
+        color: var(--v-button-text);
+        border: none;
+        border-radius: 999px;
+        padding: 0.95rem 2rem;
+        font-family: 'Work Sans', system-ui, sans-serif;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      .preview-next-btn:hover { filter: brightness(0.96); }
+    </style>
+    <script>
+      const CATEGORIES = {
+        CLEAN_SWEET_ROMANCE: 'Clean / Sweet Romance',
+        ROMANTIC_SUSPENSE: 'Romantic Suspense',
+        COZY_MYSTERY: 'Cozy Mystery',
+        JOURNALS: 'Journals',
+        NONFICTION_SHORT_READS: 'Nonfiction Short Reads',
+        WORKBOOKS: 'Workbooks',
+        CHILDRENS_BOOKS: "Children's Books",
+      };
+
+      const SALES_INTENTS = {
+        [CATEGORIES.CLEAN_SWEET_ROMANCE]: 'Reader Trust + Emotional Payoff',
+        [CATEGORIES.ROMANTIC_SUSPENSE]: 'Tension + Connection',
+        [CATEGORIES.COZY_MYSTERY]: 'Series Binge + World Comfort',
+        [CATEGORIES.JOURNALS]: 'Guided Reflection + Giftability',
+        [CATEGORIES.NONFICTION_SHORT_READS]: 'Practical Outcome + Author Authority',
+        [CATEGORIES.WORKBOOKS]: 'Hands-On Implementation',
+        [CATEGORIES.CHILDRENS_BOOKS]: 'Parent/Teacher Buyer Fit + Story Experience',
+      };
+
+      const INTAKE_QUESTIONS = {
+        [CATEGORIES.CLEAN_SWEET_ROMANCE]: [
+          'Is this standalone or series?',
+          'What is the central romance trope?',
+          'What is the emotional promise?',
+          'What makes the relationship sweet or heartwarming?',
+          'Is the setting part of the appeal?',
+          'Are there family, faith, friendship, or community themes?',
+          'What should not be spoiled?',
+        ],
+        [CATEGORIES.ROMANTIC_SUSPENSE]: [
+          'What is the suspense element?',
+          'What is the romantic relationship dynamic?',
+          'Is the danger external, emotional, or criminal?',
+          'What can be teased without spoiling?',
+          'What is the tone: light, moderate, or intense suspense?',
+          'Does the cover lean romance, suspense, or both?',
+        ],
+        [CATEGORIES.COZY_MYSTERY]: [
+          'Who is the sleuth?',
+          'What is the setting?',
+          'What makes the mystery cozy, not dark?',
+          'Is there a recurring community hook (pet, bakery, bookstore)?',
+          'Is this part of a series?',
+          'What recurring elements should be featured?',
+        ],
+        [CATEGORIES.JOURNALS]: [
+          'What type of journal is this?',
+          'Who is it for?',
+          'What problem or desire does it support?',
+          'Is it guided or blank?',
+          'How many pages?',
+          'What sections are inside?',
+          'Is it giftable?',
+        ],
+        [CATEGORIES.NONFICTION_SHORT_READS]: [
+          'What problem does the book solve?',
+          'Who is the reader?',
+          'What will they understand or be able to do after reading?',
+          'What is the framework or method?',
+          'What makes the author credible?',
+          'Are there worksheets, checklists, or action steps?',
+        ],
+        [CATEGORIES.WORKBOOKS]: [
+          'What is the workbook designed to help the reader do?',
+          'Is it tied to a course, book, or coaching program?',
+          'What sections are included?',
+          'Are there worksheets, trackers, templates, checklists?',
+          'What is the intended use: daily, weekly, project-based, self-paced?',
+          'Can sample pages be shown?',
+        ],
+        [CATEGORIES.CHILDRENS_BOOKS]: [
+          'What age range?',
+          'Is it picture book, early reader, chapter book, or read-aloud?',
+          'What is the theme or lesson?',
+          'What makes it fun for children?',
+          'What makes it meaningful for adults?',
+          'What illustration style is used?',
+          'Can interior spreads be shown?',
+        ],
+      };
+
+      const MODULE_STACKS = {
+        [CATEGORIES.CLEAN_SWEET_ROMANCE]: [
+          'Hero banner with emotional hook',
+          'Character or couple dynamic module',
+          'Tropes / readers-who-love section',
+          'Setting or small-town world module',
+          'Series reading order or author promise',
+        ],
+        [CATEGORIES.ROMANTIC_SUSPENSE]: [
+          'Hero banner with tension and emotional hook',
+          'Stakes module',
+          'Character / couple trust module',
+          'Setting or mystery atmosphere module',
+          'Series comparison chart or next-book module',
+        ],
+        [CATEGORIES.COZY_MYSTERY]: [
+          'Cozy world banner',
+          'Meet the sleuth module',
+          'Clues and charm module',
+          'Series reading order chart',
+          'For readers who love module',
+        ],
+        [CATEGORIES.JOURNALS]: [
+          'Hero banner with use-case promise',
+          'Inside-the-journal feature module',
+          'How to use it module',
+          'Who it is for module',
+          'Gift or lifestyle module',
+        ],
+        [CATEGORIES.NONFICTION_SHORT_READS]: [
+          'Problem-to-solution hero banner',
+          "What you'll learn module",
+          'Framework or method module',
+          'Inside the book module',
+          'Author credibility or reader-fit module',
+        ],
+        [CATEGORIES.WORKBOOKS]: [
+          'Outcome/use-case hero banner',
+          'Inside pages/features module',
+          'Step-by-step process module',
+          'Who it is for module',
+          'Companion product or author/program module',
+        ],
+        [CATEGORIES.CHILDRENS_BOOKS]: [
+          'Bright story-world hero banner',
+          'Learning/theme module',
+          'Inside the book module',
+          'Perfect-for module (bedtime, classroom, gifts)',
+          'Author/series module',
+        ],
+      };
+
+      const COMPLIANCE_RULES = [
+        {
+          label: 'Pricing or promotions',
+          trigger: 'Any mention of price, sale, discount, deal, free, or promotional language',
+          resolution: 'Remove. A+ is for storytelling, not transactions.',
+        },
+        {
+          label: 'External links or QR codes',
+          trigger: 'URLs, web addresses, QR codes, or off-Amazon links',
+          resolution: 'Remove. A+ must keep shoppers on Amazon.',
+        },
+        {
+          label: 'Superlative claims',
+          trigger: "'Best,' 'top-rated,' '#1,' 'leading' without substantiation",
+          resolution: 'Remove or replace with specific verifiable language.',
+        },
+        {
+          label: 'Competitor names',
+          trigger: 'Any named competitor brand, author, or product',
+          resolution: 'Remove entirely.',
+        },
+        {
+          label: 'Customer review quotes',
+          trigger: 'Any quote from a regular customer review or testimonial',
+          resolution: 'Remove. Only up to 4 endorsements from recognized publications/public figures with clear attribution are allowed.',
+        },
+        {
+          label: 'Non-evergreen language',
+          trigger: "'New,' 'this year,' 'just released,' 'holiday special'",
+          resolution: 'Replace with evergreen alternatives.',
+        },
+        {
+          label: 'Off-brand imagery',
+          trigger: 'Images not owned by author/publisher, third-party logos',
+          resolution: 'Replace with original owned assets only.',
+        },
+        {
+          label: 'Calls to action off Amazon',
+          trigger: "'Buy on my website,' 'Follow me on Instagram,' 'Join my newsletter'",
+          resolution: 'Remove. A+ cannot drive traffic off Amazon.',
+        },
+        {
+          label: 'Content contradicting main listing',
+          trigger: 'A+ claims that conflict with product description or genre labels',
+          resolution: 'Align A+ with the main listing before publishing.',
+        },
+      ];
+    </script>
+    <script defer src="app/steps/step1-intake.js"></script>
+    <script defer src="app/steps/step2-analysis.js"></script>
+    <script defer src="app/steps/step3-strategy.js"></script>
+  </head>
+  <body>
+    <div class="app-root">
+      <main id="step-mount"></main>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('step-mount').appendChild(createStep1Intake());
+
+        var nextBtn = null;
+        var step1Form = document.querySelector('.step1__form');
+        if (step1Form) {
+          nextBtn = document.createElement('button');
+          nextBtn.type = 'button';
+          nextBtn.className = 'preview-next-btn';
+          nextBtn.textContent = 'Next: Show Step 2 (preview)';
+          step1Form.appendChild(nextBtn);
+        }
+
+        function mountStep2(category, coverFile) {
+          var existing = document.getElementById('step2-mount');
+          if (existing) existing.remove();
+
+          var step2Mount = document.createElement('div');
+          step2Mount.id = 'step2-mount';
+          document.querySelector('.app-root').appendChild(step2Mount);
+          step2Mount.appendChild(createStep2Analysis({ category: category, coverFile: coverFile }));
+
+          step2Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function collectStep3Inputs(fallbackCategory) {
+          var titleInput = document.getElementById('step1-title');
+          var authorInput = document.getElementById('step1-author');
+          var genreInput = document.getElementById('step1-genre');
+          var heatInput = document.getElementById('step1-heat');
+          var descInput = document.getElementById('step1-description');
+          var seriesToggle = document.querySelector('.step1__toggle-input');
+          var heatField = document.querySelector('[data-field="heat-level"]');
+          var moodEl = document.querySelector('[data-brief="mood-descriptor"]');
+
+          var category = (genreInput && genreInput.value) || fallbackCategory || '';
+          var heatVisible = heatField && !heatField.classList.contains('step1__field--hidden');
+          var heatLevel = heatVisible && heatInput ? heatInput.value.trim() : '';
+          var seriesStatus = seriesToggle && seriesToggle.checked ? 'series' : 'standalone';
+          var coverMood = moodEl ? moodEl.textContent.trim() : '';
+
+          var intakeAnswers = [];
+          var fields = document.querySelectorAll('.step2__question-field');
+          fields.forEach(function (field) {
+            var label = field.querySelector('.step2__question-label');
+            var input = field.querySelector('.step2__question-input');
+            if (label && input && input.value.trim()) {
+              intakeAnswers.push({
+                question: label.textContent.trim(),
+                answer: input.value.trim(),
+              });
+            }
+          });
+
+          return {
+            title: titleInput ? titleInput.value.trim() : '',
+            author: authorInput ? authorInput.value.trim() : '',
+            category: category,
+            heatLevel: heatLevel,
+            description: descInput ? descInput.value.trim() : '',
+            seriesStatus: seriesStatus,
+            coverMood: coverMood,
+            intakeAnswers: intakeAnswers,
+          };
+        }
+
+        function mountStep3(category) {
+          var existing = document.getElementById('step3-mount');
+          if (existing) existing.remove();
+
+          var inputs = collectStep3Inputs(category);
+
+          var step3Mount = document.createElement('div');
+          step3Mount.id = 'step3-mount';
+          document.querySelector('.app-root').appendChild(step3Mount);
+          step3Mount.appendChild(createStep3Strategy(inputs));
+
+          step3Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        if (nextBtn) {
+          nextBtn.addEventListener('click', function () {
+            var genreInput = document.getElementById('step1-genre');
+            var coverInput = document.getElementById('step1-cover');
+            var category = genreInput ? genreInput.value : '';
+            var coverFile = coverInput && coverInput.files && coverInput.files[0]
+              ? coverInput.files[0]
+              : null;
+            mountStep2(category, coverFile);
+          });
+        }
+
+        document.addEventListener('step1-complete', function (event) {
+          var detail = event.detail || {};
+          if (nextBtn) nextBtn.hidden = true;
+          mountStep2(detail.category || '', detail.coverFile || null);
+        });
+
+        document.addEventListener('step2-complete', function (event) {
+          var detail = event.detail || {};
+          mountStep3(detail.category || '');
+        });
+      });
+    </script>
+  </body>
+</html>
