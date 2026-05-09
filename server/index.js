@@ -18,10 +18,17 @@ const PORT = process.env.PORT || 3001;
 const client = new Anthropic({ apiKey });
 const app = express();
 
-// CORS — allow all origins for local development. The frontend runs on a
-// different port (or file://) than the backend, so the browser will block
-// requests without these headers. Lock this down before deploying.
-app.use(cors({ origin: '*' }));
+// CORS — explicit policy with preflight support. Allows any origin for now
+// (the frontend can be served from Netlify, file://, or localhost during dev).
+// Lock the origin down before going to real production.
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors());
+
 app.use(express.json({ limit: '1mb' }));
 
 app.post('/api/generate', async (req, res) => {
