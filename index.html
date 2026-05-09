@@ -224,6 +224,7 @@
     <script defer src="app/steps/step2-analysis.js"></script>
     <script defer src="app/steps/step3-strategy.js"></script>
     <script defer src="app/steps/step4-layout.js"></script>
+    <script defer src="app/steps/step5-copy.js"></script>
   </head>
   <body>
     <div class="app-root">
@@ -348,6 +349,35 @@
 
           step4Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        function mountStep5(layout) {
+          var existing = document.getElementById('step5-mount');
+          if (existing) existing.remove();
+
+          var inputs = collectStep3Inputs('');
+
+          var step5Mount = document.createElement('div');
+          step5Mount.id = 'step5-mount';
+          document.querySelector('.app-root').appendChild(step5Mount);
+          step5Mount.appendChild(createStep5Copy({
+            title: inputs.title,
+            author: inputs.author,
+            category: inputs.category,
+            heatLevel: inputs.heatLevel,
+            description: inputs.description,
+            seriesStatus: inputs.seriesStatus,
+            coverMood: inputs.coverMood,
+            salesIntent: layout && layout.salesIntent ? layout.salesIntent : '',
+            layoutRationale: layout && layout.rationale ? layout.rationale : '',
+            modules: layout && Array.isArray(layout.modules) ? layout.modules.slice() : [],
+          }));
+
+          step5Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.addEventListener('step4-complete', function (event) {
+          mountStep5(event.detail || window.selectedLayout || null);
+        });
 
         if (nextBtn) {
           nextBtn.addEventListener('click', function () {
