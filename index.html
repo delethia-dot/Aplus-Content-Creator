@@ -223,6 +223,7 @@
     <script defer src="app/steps/step1-intake.js"></script>
     <script defer src="app/steps/step2-analysis.js"></script>
     <script defer src="app/steps/step3-strategy.js"></script>
+    <script defer src="app/steps/step4-layout.js"></script>
   </head>
   <body>
     <div class="app-root">
@@ -310,6 +311,42 @@
           step3Mount.appendChild(createStep3Strategy(inputs));
 
           step3Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          var step3Continue = step3Mount.querySelector('.step3__continue');
+          if (step3Continue) {
+            step3Continue.addEventListener('click', mountStep4);
+          }
+        }
+
+        function mountStep4() {
+          var existing = document.getElementById('step4-mount');
+          if (existing) existing.remove();
+
+          var titleInput = document.getElementById('step1-title');
+          var genreInput = document.getElementById('step1-genre');
+          var briefTextEl = document.querySelector('#strategy-brief-content .step3__brief-text');
+          var briefContentEl = document.getElementById('strategy-brief-content');
+
+          var title = titleInput ? titleInput.value.trim() : '';
+          var category = genreInput ? genreInput.value : '';
+          var salesIntent = (typeof SALES_INTENTS !== 'undefined' && SALES_INTENTS[category])
+            ? SALES_INTENTS[category]
+            : '';
+          var strategyBrief = briefTextEl
+            ? briefTextEl.textContent.trim()
+            : (briefContentEl ? briefContentEl.textContent.trim() : '');
+
+          var step4Mount = document.createElement('div');
+          step4Mount.id = 'step4-mount';
+          document.querySelector('.app-root').appendChild(step4Mount);
+          step4Mount.appendChild(createStep4Layout({
+            title: title,
+            category: category,
+            salesIntent: salesIntent,
+            strategyBrief: strategyBrief,
+          }));
+
+          step4Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         if (nextBtn) {
