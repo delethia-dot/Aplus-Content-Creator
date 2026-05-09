@@ -9,4 +9,5 @@
   --v-soft:        #b99584;  /* Borders, dividers, soft UI */
   --v-accent-2:    #a9b48d;  /* Secondary accent, sage */
   --v-button-text: #47101e;  /* Text on accent buttons */
+  --v-warm:        #4a3728;  /* Warm dark brown for body text on light surfaces */
 }

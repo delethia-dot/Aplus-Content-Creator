@@ -22,20 +22,6 @@
         background: var(--v-surface);
         color: var(--v-bg);
       }
-      .preview-next-btn {
-        align-self: flex-start;
-        margin-top: 0.5rem;
-        background: var(--v-accent-2);
-        color: var(--v-button-text);
-        border: none;
-        border-radius: 999px;
-        padding: 0.95rem 2rem;
-        font-family: 'Work Sans', system-ui, sans-serif;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-      }
-      .preview-next-btn:hover { filter: brightness(0.96); }
     </style>
     <script>
       const CATEGORIES = {
@@ -234,16 +220,6 @@
       document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('step-mount').appendChild(createStep1Intake());
 
-        var nextBtn = null;
-        var step1Form = document.querySelector('.step1__form');
-        if (step1Form) {
-          nextBtn = document.createElement('button');
-          nextBtn.type = 'button';
-          nextBtn.className = 'preview-next-btn';
-          nextBtn.textContent = 'Next: Show Step 2 (preview)';
-          step1Form.appendChild(nextBtn);
-        }
-
         function mountStep2(category, coverFile) {
           var existing = document.getElementById('step2-mount');
           if (existing) existing.remove();
@@ -379,21 +355,8 @@
           mountStep5(event.detail || window.selectedLayout || null);
         });
 
-        if (nextBtn) {
-          nextBtn.addEventListener('click', function () {
-            var genreInput = document.getElementById('step1-genre');
-            var coverInput = document.getElementById('step1-cover');
-            var category = genreInput ? genreInput.value : '';
-            var coverFile = coverInput && coverInput.files && coverInput.files[0]
-              ? coverInput.files[0]
-              : null;
-            mountStep2(category, coverFile);
-          });
-        }
-
         document.addEventListener('step1-complete', function (event) {
           var detail = event.detail || {};
-          if (nextBtn) nextBtn.hidden = true;
           mountStep2(detail.category || '', detail.coverFile || null);
         });
 
