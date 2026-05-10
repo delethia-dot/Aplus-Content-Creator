@@ -108,6 +108,65 @@ const step6Styles = `
       linear-gradient(145deg, #8f1b3f, #5c1428 72%);
     color: var(--v-text);
     padding: 1rem 1.5rem 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .step6__card-header-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .step6__card-checkmark,
+  .step6__card-copy,
+  .step6__card-chevron {
+    display: none;
+  }
+  .step6__card--ready .step6__card-header {
+    cursor: pointer;
+  }
+  .step6__card--ready .step6__card-checkmark {
+    display: inline-block;
+    color: var(--v-accent);
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+  .step6__card--ready .step6__card-copy {
+    display: inline-flex;
+    background: var(--v-accent);
+    color: var(--v-button-text);
+    border: none;
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-family: 'Work Sans', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .step6__card--ready .step6__card-copy:hover { filter: brightness(0.96); }
+  .step6__card--ready .step6__card-copy.step6__copy-btn--copied {
+    background: var(--v-accent-2);
+  }
+  .step6__card--ready .step6__card-chevron {
+    display: inline-block;
+    color: var(--v-accent);
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+  .step6__card--ready .step6__card-chevron.expanded {
+    transform: rotate(180deg);
+  }
+  .step6__card-body--collapsed { display: none; }
+  .step6__all-ready {
+    margin: 0 0 0.5rem;
+    background: var(--v-surface);
+    color: var(--v-bg);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 1rem 1.25rem;
+    border-left: 4px solid var(--v-accent);
+    border-radius: 8px;
   }
   .step6__card-eyebrow {
     margin: 0 0 0.3rem;
@@ -396,6 +455,8 @@ function createStep6Prompts(options) {
       </div>
     </div>
 
+    <div class="step6__all-ready" data-all-ready hidden>All 5 module image prompts are ready. Review and edit any module by expanding it above.</div>
+
     <button class="step6__continue" type="button" disabled>Run Compliance Check</button>
   `;
 
@@ -420,6 +481,8 @@ function createStep6Prompts(options) {
   function checkContinueState() {
     const allSuccess = moduleStates.length > 0 && moduleStates.every((s) => s.status === 'success');
     continueBtn.disabled = !allSuccess;
+    const allReadyPanel = root.querySelector('[data-all-ready]');
+    if (allReadyPanel) allReadyPanel.hidden = !allSuccess;
   }
 
   function setCardLoading(idx) {
@@ -427,7 +490,9 @@ function createStep6Prompts(options) {
     state.status = 'loading';
     const card = state.cardEl;
     if (!card) return;
+    card.classList.remove('step6__card--ready');
     const body = card.querySelector('[data-card-body]');
+    body.classList.remove('step6__card-body--collapsed');
     body.innerHTML = '';
     const loading = document.createElement('p');
     loading.className = 'step6__card-loading';
@@ -441,7 +506,9 @@ function createStep6Prompts(options) {
     state.status = 'error';
     const card = state.cardEl;
     if (!card) return;
+    card.classList.remove('step6__card--ready');
     const body = card.querySelector('[data-card-body]');
+    body.classList.remove('step6__card-body--collapsed');
     body.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'step6__card-error';
@@ -556,6 +623,13 @@ function createStep6Prompts(options) {
       rebuildBtn.addEventListener('click', () => rebuildFullPromptFromLayers(idx));
     }
 
+    // Mark the card as ready and collapse it; the header click handler
+    // (wired in the card-creation loop) toggles the body open/closed.
+    card.classList.add('step6__card--ready');
+    body.classList.add('step6__card-body--collapsed');
+    const headerChevron = card.querySelector('.step6__card-chevron');
+    if (headerChevron) headerChevron.classList.remove('expanded');
+
     checkContinueState();
   }
 
@@ -624,7 +698,9 @@ function createStep6Prompts(options) {
     const state = moduleStates[idx];
     const card = state.cardEl;
     if (!card) return;
+    card.classList.remove('step6__card--ready');
     const body = card.querySelector('[data-card-body]');
+    body.classList.remove('step6__card-body--collapsed');
     body.innerHTML = '';
     const msg = document.createElement('p');
     msg.className = 'step6__card-loading';
@@ -693,13 +769,37 @@ function createStep6Prompts(options) {
     card.className = 'step6__card';
     card.dataset.moduleIdx = String(idx);
     card.innerHTML = `
-      <header class="step6__card-header">
-        <p class="step6__card-eyebrow">Module ${idx + 1} of 5</p>
-        <h3 class="step6__card-title">${step6EscapeHtml(state.moduleName)}</h3>
+      <header class="step6__card-header" data-card-header>
+        <span class="step6__card-checkmark" aria-hidden="true">&#10003;</span>
+        <div class="step6__card-header-text">
+          <p class="step6__card-eyebrow">Module ${idx + 1} of 5</p>
+          <h3 class="step6__card-title">${step6EscapeHtml(state.moduleName)}</h3>
+        </div>
+        <button type="button" class="step6__card-copy" data-card-copy aria-label="Copy full prompt to clipboard">Copy Full Prompt</button>
+        <span class="step6__card-chevron" aria-hidden="true">&#9660;</span>
       </header>
       <div class="step6__card-body" data-card-body></div>
     `;
     state.cardEl = card;
+
+    // Header click: toggle expand/collapse, but only when the card is ready.
+    // The Copy button stops propagation so it never triggers the toggle.
+    const headerEl = card.querySelector('[data-card-header]');
+    const bodyEl = card.querySelector('[data-card-body]');
+    const chevronEl = card.querySelector('.step6__card-chevron');
+    headerEl.addEventListener('click', () => {
+      if (!card.classList.contains('step6__card--ready')) return;
+      const nowCollapsed = bodyEl.classList.toggle('step6__card-body--collapsed');
+      if (chevronEl) chevronEl.classList.toggle('expanded', !nowCollapsed);
+    });
+
+    const copyBtn = card.querySelector('[data-card-copy]');
+    copyBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (!card.classList.contains('step6__card--ready')) return;
+      step6CopyToClipboard(state.fullPrompt || '', copyBtn);
+    });
+
     cardsContainer.appendChild(card);
     setCardLoading(idx);
   });
