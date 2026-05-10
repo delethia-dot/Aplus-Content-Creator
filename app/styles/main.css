@@ -11,3 +11,55 @@
   --v-button-text: #47101e;  /* Text on accent buttons */
   --v-warm:        #4a3728;  /* Warm dark brown for body text on light surfaces */
 }
+
+/* Step accordion — collapsed completed steps render as a single summary bar.
+   Clicking the bar toggles the wrapped step content visible/hidden. */
+.step-collapsed {
+  display: none;
+}
+
+.step-summary-bar {
+  background:
+    radial-gradient(circle at 70% 10%, rgba(255, 255, 255, 0.12), transparent 18rem),
+    linear-gradient(145deg, #8f1b3f, #5c1428 72%);
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 8px;
+  margin: 0 auto 0.5rem;
+  max-width: 760px;
+}
+
+.step-summary-bar:hover {
+  filter: brightness(1.1);
+}
+
+.step-summary-left {
+  display: flex;
+  align-items: center;
+}
+
+.step-checkmark {
+  color: var(--v-accent);
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+}
+
+.step-summary-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--v-text);
+}
+
+.step-chevron {
+  color: var(--v-accent);
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+
+.step-chevron.expanded {
+  transform: rotate(180deg);
+}

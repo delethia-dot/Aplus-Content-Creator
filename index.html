@@ -215,13 +215,50 @@
   </head>
   <body>
     <div class="app-root">
-      <main id="step-mount"></main>
+      <main id="step1-mount"></main>
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('step-mount').appendChild(createStep1Intake());
+        document.getElementById('step1-mount').appendChild(createStep1Intake());
+
+        function collapseStep(mountId, stepName) {
+          var mountEl = document.getElementById(mountId);
+          if (!mountEl) return;
+          if (mountEl.querySelector(':scope > .step-summary-bar')) return;
+
+          var content = document.createElement('div');
+          content.className = 'step-content';
+          while (mountEl.firstChild) {
+            content.appendChild(mountEl.firstChild);
+          }
+
+          var summary = document.createElement('div');
+          summary.className = 'step-summary-bar';
+          summary.setAttribute('role', 'button');
+          summary.setAttribute('aria-expanded', 'false');
+          summary.innerHTML =
+            '<span class="step-summary-left">' +
+              '<span class="step-checkmark" aria-hidden="true">&#10003;</span>' +
+              '<span class="step-summary-title"></span>' +
+            '</span>' +
+            '<span class="step-chevron" aria-hidden="true">&#9660;</span>';
+          summary.querySelector('.step-summary-title').textContent = stepName;
+
+          summary.addEventListener('click', function () {
+            var nowCollapsed = content.classList.toggle('step-collapsed');
+            var chevron = summary.querySelector('.step-chevron');
+            if (chevron) chevron.classList.toggle('expanded', !nowCollapsed);
+            summary.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+          });
+
+          mountEl.appendChild(summary);
+          mountEl.appendChild(content);
+          content.classList.add('step-collapsed');
+        }
 
         function mountStep2(category, coverFile) {
+          collapseStep('step1-mount', 'Step 1 of 7 — Intake');
+
           var existing = document.getElementById('step2-mount');
           if (existing) existing.remove();
 
@@ -281,6 +318,8 @@
         }
 
         function mountStep3(category) {
+          collapseStep('step2-mount', 'Step 2 of 7 — Analysis');
+
           var existing = document.getElementById('step3-mount');
           if (existing) existing.remove();
 
@@ -300,6 +339,8 @@
         }
 
         function mountStep4() {
+          collapseStep('step3-mount', 'Step 3 of 7 — Strategy Brief');
+
           var existing = document.getElementById('step4-mount');
           if (existing) existing.remove();
 
@@ -331,6 +372,8 @@
         }
 
         function mountStep5(layout) {
+          collapseStep('step4-mount', 'Step 4 of 7 — Layout Options');
+
           var existing = document.getElementById('step5-mount');
           if (existing) existing.remove();
 
@@ -360,6 +403,8 @@
         });
 
         function mountStep6() {
+          collapseStep('step5-mount', 'Step 5 of 7 — Module Copy');
+
           var existing = document.getElementById('step6-mount');
           if (existing) existing.remove();
 
