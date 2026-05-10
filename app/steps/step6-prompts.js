@@ -763,7 +763,10 @@ function createStep6Prompts(options) {
     }
   }
 
-  // Build the cards (one per module, in order)
+  // Build the cards (one per module, in order). Click wiring lives on the
+  // persistent cardsContainer (event delegation) so it is unaffected by
+  // body.innerHTML rewrites during loading/success/error/rate-limit
+  // transitions and by any timing of when each card lands in the DOM.
   moduleStates.forEach((state, idx) => {
     const card = document.createElement('div');
     card.className = 'step6__card';
@@ -781,27 +784,34 @@ function createStep6Prompts(options) {
       <div class="step6__card-body" data-card-body></div>
     `;
     state.cardEl = card;
-
-    // Header click: toggle expand/collapse, but only when the card is ready.
-    // The Copy button stops propagation so it never triggers the toggle.
-    const headerEl = card.querySelector('[data-card-header]');
-    const bodyEl = card.querySelector('[data-card-body]');
-    const chevronEl = card.querySelector('.step6__card-chevron');
-    headerEl.addEventListener('click', () => {
-      if (!card.classList.contains('step6__card--ready')) return;
-      const nowCollapsed = bodyEl.classList.toggle('step6__card-body--collapsed');
-      if (chevronEl) chevronEl.classList.toggle('expanded', !nowCollapsed);
-    });
-
-    const copyBtn = card.querySelector('[data-card-copy]');
-    copyBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      if (!card.classList.contains('step6__card--ready')) return;
-      step6CopyToClipboard(state.fullPrompt || '', copyBtn);
-    });
-
     cardsContainer.appendChild(card);
     setCardLoading(idx);
+  });
+
+  // Single delegated click handler on the persistent cards container.
+  // Copy-button clicks short-circuit the toggle path; header clicks (anywhere
+  // in the header except the Copy button) toggle the body collapse + chevron.
+  cardsContainer.addEventListener('click', function (event) {
+    const copyBtn = event.target.closest('[data-card-copy]');
+    if (copyBtn) {
+      const copyCard = copyBtn.closest('.step6__card');
+      if (!copyCard || !copyCard.classList.contains('step6__card--ready')) return;
+      const copyIdx = parseInt(copyCard.dataset.moduleIdx, 10);
+      if (Number.isNaN(copyIdx)) return;
+      const copyState = moduleStates[copyIdx];
+      step6CopyToClipboard((copyState && copyState.fullPrompt) || '', copyBtn);
+      return;
+    }
+
+    const header = event.target.closest('[data-card-header]');
+    if (!header) return;
+    const card = header.closest('.step6__card');
+    if (!card || !card.classList.contains('step6__card--ready')) return;
+    const body = card.querySelector('[data-card-body]');
+    const chevron = card.querySelector('.step6__card-chevron');
+    if (!body) return;
+    const nowCollapsed = body.classList.toggle('step6__card-body--collapsed');
+    if (chevron) chevron.classList.toggle('expanded', !nowCollapsed);
   });
 
   continueBtn.addEventListener('click', () => {
