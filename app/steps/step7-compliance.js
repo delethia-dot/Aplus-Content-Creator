@@ -35,19 +35,22 @@ const STEP7_COMPLIANCE_RULES = [
     suggestedFix: 'Remove. Only up to 4 endorsements from recognized publications or public figures with clear attribution are allowed.',
     customCheck: function (text) {
       const found = [];
-      const quoteRe = /["“”']([^"“”']{1,400})["“”']/g;
-      let m;
-      while ((m = quoteRe.exec(text)) !== null) {
-        const inner = m[1].trim();
-        const wordCount = inner.split(/\s+/).filter(Boolean).length;
-        if (wordCount > 5) found.push(m[0]);
-      }
-      const phrasePatterns = [
-        /as seen in reviews/i,
-        /customers say/i,
-        /readers say/i,
+      // Only flag when the text contains a quoted segment AND one of the
+      // attribution phrases below. General quoted dialogue or quoted phrases
+      // mid-sentence with no attribution are intentionally not flagged.
+      const hasQuote = /["“”'][^"“”']{1,400}["“”']/.test(text);
+      if (!hasQuote) return found;
+      const attributionPatterns = [
+        /\bsays\b/i,
+        /\bsaid\b/i,
+        /\baccording to\b/i,
+        /\bwrites\b/i,
+        /\breviewed\b/i,
+        /\breader says\b/i,
+        /\bcustomer says\b/i,
+        /\bas seen in reviews\b/i,
       ];
-      phrasePatterns.forEach(function (p) {
+      attributionPatterns.forEach(function (p) {
         const match = text.match(p);
         if (match) found.push(match[0]);
       });
@@ -466,6 +469,9 @@ function createStep7Compliance(options) {
           const matches = checkText(rule, text);
           matches.forEach(function (matched) {
             violations.push({
+              ruleId: rule.id,
+              ruleLabel: rule.label,
+              suggestedFix: rule.suggestedFix,
               moduleName: (mc && mc.moduleName) || 'Module ' + (idx + 1),
               moduleIdx: idx,
               fieldName: fieldName,
@@ -545,7 +551,7 @@ function createStep7Compliance(options) {
 
           const fixEl = document.createElement('p');
           fixEl.className = 'step7__violation-fix';
-          fixEl.textContent = 'Suggested fix: ' + entry.rule.suggestedFix;
+          fixEl.textContent = 'Suggested fix: ' + (v.suggestedFix || entry.rule.suggestedFix);
           item.appendChild(fixEl);
 
           violationsWrap.appendChild(item);
