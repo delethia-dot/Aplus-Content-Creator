@@ -409,7 +409,7 @@ function createStep7Compliance(options) {
   const category = opts.category || '';
   const strategyBrief = opts.strategyBrief || '';
   const layout = opts.layout || null;
-  const moduleCopy = Array.isArray(opts.moduleCopy) ? opts.moduleCopy : [];
+  let moduleCopy = Array.isArray(opts.moduleCopy) ? opts.moduleCopy : [];
   const imagePrompts = Array.isArray(opts.imagePrompts) ? opts.imagePrompts : [];
 
   const root = document.createElement('section');
@@ -663,7 +663,34 @@ function createStep7Compliance(options) {
     exportBlocksEl.appendChild(fullBtn);
   }
 
-  rerunBtn.addEventListener('click', runCompliance);
+  function readLiveModuleCopyFromStep5() {
+    const step5Mount = document.getElementById('step5-mount');
+    if (!step5Mount) return null;
+    const cards = step5Mount.querySelectorAll('.step5__card');
+    if (!cards.length) return null;
+    const live = [];
+    cards.forEach(function (card, idx) {
+      const titleEl = card.querySelector('.step5__card-title');
+      const headlineEl = card.querySelector('[data-field="headline"]');
+      const bodyEl = card.querySelector('[data-field="body"]');
+      const designNoteEl = card.querySelector('[data-field="designNote"]');
+      live.push({
+        moduleName: titleEl ? titleEl.textContent.trim() : 'Module ' + (idx + 1),
+        headline: headlineEl ? (headlineEl.textContent || '') : '',
+        body: bodyEl ? (bodyEl.textContent || '') : '',
+        designNote: designNoteEl ? (designNoteEl.textContent || '') : '',
+      });
+    });
+    return live;
+  }
+
+  rerunBtn.addEventListener('click', function () {
+    const live = readLiveModuleCopyFromStep5();
+    if (live && live.length) {
+      moduleCopy = live;
+    }
+    runCompliance();
+  });
 
   // Run on mount
   runCompliance();
