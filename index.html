@@ -222,7 +222,7 @@
       document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('step1-mount').appendChild(createStep1Intake());
 
-        function collapseStep(mountId, stepName) {
+        function collapseStep(mountId, stepName, startExpanded) {
           var mountEl = document.getElementById(mountId);
           if (!mountEl) return;
           if (mountEl.querySelector(':scope > .step-summary-bar')) return;
@@ -236,7 +236,7 @@
           var summary = document.createElement('div');
           summary.className = 'step-summary-bar';
           summary.setAttribute('role', 'button');
-          summary.setAttribute('aria-expanded', 'false');
+          summary.setAttribute('aria-expanded', startExpanded ? 'true' : 'false');
           summary.innerHTML =
             '<span class="step-summary-left">' +
               '<span class="step-checkmark" aria-hidden="true">&#10003;</span>' +
@@ -254,7 +254,12 @@
 
           mountEl.appendChild(summary);
           mountEl.appendChild(content);
-          content.classList.add('step-collapsed');
+          if (startExpanded) {
+            var initialChevron = summary.querySelector('.step-chevron');
+            if (initialChevron) initialChevron.classList.add('expanded');
+          } else {
+            content.classList.add('step-collapsed');
+          }
         }
 
         function mountStep2(category, coverFile) {
@@ -462,6 +467,11 @@
           }));
 
           step7Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          // Wrap Step 7 in the same accordion shell as Steps 1-6, but start
+          // expanded (since this is the active step). The user can click the
+          // summary bar to collapse/expand manually.
+          collapseStep('step7-mount', 'Step 7 of 7 — Compliance Check & Export', true);
         }
 
         document.addEventListener('step6-complete', function (event) {
