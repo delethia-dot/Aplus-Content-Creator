@@ -168,6 +168,13 @@ const styles = `
     color: var(--v-bg);
     opacity: 0.7;
   }
+  .step1__field-hint {
+    margin-top: -0.15rem;
+    font-style: italic;
+    color: #7a3a47;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
   .step1__file-error {
     margin-top: 0.25rem;
     padding: 0.45rem 0.65rem;
@@ -290,6 +297,12 @@ function createStep1Intake() {
         <label class="step1__label" for="step1-description">Book / Series Description<span class="step1__required">*</span></label>
         <textarea class="step1__textarea" id="step1-description" name="description" required></textarea>
         <span class="step1__field-error" data-required-error hidden>This field is required.</span>
+      </div>
+
+      <div class="step1__field">
+        <label class="step1__label" for="step1-character">Main Character Description (optional)</label>
+        <textarea class="step1__textarea" id="step1-character" name="characterDescription"></textarea>
+        <span class="step1__field-hint">Describe your main character or characters. Include ethnicity, age, appearance, and any details that matter for your cover visuals and A+ content images. Leave blank to use generic lifestyle imagery.</span>
       </div>
 
       <div class="step1__field">

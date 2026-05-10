@@ -243,6 +243,7 @@
           var genreInput = document.getElementById('step1-genre');
           var heatInput = document.getElementById('step1-heat');
           var descInput = document.getElementById('step1-description');
+          var charInput = document.getElementById('step1-character');
           var seriesToggle = document.querySelector('.step1__toggle-input');
           var heatField = document.querySelector('[data-field="heat-level"]');
 
@@ -251,6 +252,7 @@
           var heatLevel = heatVisible && heatInput ? heatInput.value.trim() : '';
           var seriesStatus = seriesToggle && seriesToggle.checked ? 'series' : 'standalone';
           var coverMood = (window.coverBrief && window.coverBrief.moodDescriptor) || '';
+          var characterDescription = charInput ? charInput.value.trim() : '';
 
           var intakeAnswers = [];
           var fields = document.querySelectorAll('.step2__question-field');
@@ -273,6 +275,7 @@
             description: descInput ? descInput.value.trim() : '',
             seriesStatus: seriesStatus,
             coverMood: coverMood,
+            characterDescription: characterDescription,
             intakeAnswers: intakeAnswers,
           };
         }
@@ -372,6 +375,7 @@
             category: inputs.category,
             heatLevel: inputs.heatLevel,
             salesIntent: layout && layout.salesIntent ? layout.salesIntent : '',
+            characterDescription: window.characterDescription || '',
             coverBrief: window.coverBrief || null,
             moduleCopy: Array.isArray(window.moduleCopy) ? window.moduleCopy : [],
           }));
@@ -385,6 +389,8 @@
 
         document.addEventListener('step1-complete', function (event) {
           var detail = event.detail || {};
+          var charInput = document.getElementById('step1-character');
+          window.characterDescription = charInput ? charInput.value.trim() : '';
           mountStep2(detail.category || '', detail.coverFile || null);
         });
 

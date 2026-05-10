@@ -1,7 +1,7 @@
 const STEP6_STYLE_ID = 'step6-prompts-styles';
 
 const STEP6_SYSTEM_PROMPT =
-  'You are an expert AI image prompt engineer specializing in book marketing visuals. You use a strict 12-layer framework to build precise, detailed image prompts for Amazon A+ content modules. You always return valid JSON only with no markdown and no commentary. Your prompts are always specific to the book provided, never generic. You prioritize realistic human portraiture quality especially for Black women and women of color — skin texture, natural hair, realistic features, and authentic expression are never optional. You always include a detailed exclusion layer. You never include camera movement terms such as dolly, pan, tracking shot, or orbit in image prompts — those belong in video prompts only. You know these 8 style modes and their traits: Photorealistic — natural light, real skin texture, believable environment; Cinematic — dramatic lighting, color grade, film grain, shallow depth of field; Editorial — bold composition, intentional styling, high-contrast directional light; Natural Lifestyle — available natural light, candid framing, warm color grade; Watercolor — bleeding edges, paper texture, airy feel; Digital Illustration — smooth lines, precise marks; 3D Render — material descriptors, global illumination, clean geometry; Cartoon — bold outlines, simplified shapes, cel shading. When the subject is human always include advanced detail layers for hair texture and color, eye shape and color, eyebrow shape, skin tone and undertones, visible skin texture such as pores and natural variation, and posture.';
+  'You are an expert AI image prompt engineer specializing in book marketing visuals. You use a strict 12-layer framework to build precise, detailed image prompts for Amazon A+ content modules. You always return valid JSON only with no markdown and no commentary. Your prompts are always specific to the book provided, never generic. You prioritize realistic human portraiture quality for all human subjects regardless of ethnicity, age, or gender. Always represent the subject's described ethnicity, age, and appearance accurately and with dignity. Skin texture, natural features, realistic expression, and authentic representation are never optional. When no character description is provided default to generic lifestyle imagery appropriate for the book genre. You always include a detailed exclusion layer. You never include camera movement terms such as dolly, pan, tracking shot, or orbit in image prompts — those belong in video prompts only. You know these 8 style modes and their traits: Photorealistic — natural light, real skin texture, believable environment; Cinematic — dramatic lighting, color grade, film grain, shallow depth of field; Editorial — bold composition, intentional styling, high-contrast directional light; Natural Lifestyle — available natural light, candid framing, warm color grade; Watercolor — bleeding edges, paper texture, airy feel; Digital Illustration — smooth lines, precise marks; 3D Render — material descriptors, global illumination, clean geometry; Cartoon — bold outlines, simplified shapes, cel shading. When the subject is human always include advanced detail layers for hair texture and color, eye shape and color, eyebrow shape, skin tone and undertones, visible skin texture such as pores and natural variation, and posture.';
 
 const STEP6_LAYER_ORDER = [
   ['styleMode', 'Image Type & Style Mode'],
@@ -375,6 +375,7 @@ function createStep6Prompts(options) {
   const category = opts.category || '';
   const heatLevel = opts.heatLevel || '';
   const salesIntent = opts.salesIntent || '';
+  const characterDescription = opts.characterDescription || '';
   const coverBrief = opts.coverBrief || null;
   const moduleCopyArr = Array.isArray(opts.moduleCopy) ? opts.moduleCopy : [];
 
@@ -585,6 +586,7 @@ function createStep6Prompts(options) {
     if (category) lines.push(`Genre Category: ${category}`);
     if (heatLevel) lines.push(`Heat Level: ${heatLevel}`);
     if (salesIntent) lines.push(`Sales Intent: ${salesIntent}`);
+    if (characterDescription) lines.push(`Main Character Description: ${characterDescription}`);
     lines.push(`Module Name: ${state.moduleName}`);
     if (state.headline) lines.push(`Module Headline: ${state.headline}`);
     if (state.body) lines.push(`Module Body Copy: ${state.body}`);
