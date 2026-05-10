@@ -212,6 +212,7 @@
     <script defer src="app/steps/step4-layout.js"></script>
     <script defer src="app/steps/step5-copy.js"></script>
     <script defer src="app/steps/step6-prompts.js"></script>
+    <script defer src="app/steps/step7-compliance.js"></script>
   </head>
   <body>
     <div class="app-root">
@@ -430,6 +431,41 @@
 
         document.addEventListener('step5-complete', function () {
           mountStep6();
+        });
+
+        function mountStep7(imagePrompts) {
+          collapseStep('step6-mount', 'Step 6 of 7 — Image Prompts');
+
+          var existing = document.getElementById('step7-mount');
+          if (existing) existing.remove();
+
+          var inputs = collectStep3Inputs('');
+          var briefTextEl = document.querySelector('#strategy-brief-content .step3__brief-text');
+          var briefContentEl = document.getElementById('strategy-brief-content');
+          var strategyBrief = briefTextEl
+            ? briefTextEl.textContent.trim()
+            : (briefContentEl ? briefContentEl.textContent.trim() : '');
+
+          var step7Mount = document.createElement('div');
+          step7Mount.id = 'step7-mount';
+          document.querySelector('.app-root').appendChild(step7Mount);
+          step7Mount.appendChild(createStep7Compliance({
+            title: inputs.title,
+            author: inputs.author,
+            category: inputs.category,
+            strategyBrief: strategyBrief,
+            layout: window.selectedLayout || null,
+            moduleCopy: Array.isArray(window.moduleCopy) ? window.moduleCopy : [],
+            imagePrompts: Array.isArray(imagePrompts)
+              ? imagePrompts
+              : (Array.isArray(window.imagePrompts) ? window.imagePrompts : []),
+          }));
+
+          step7Mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.addEventListener('step6-complete', function (event) {
+          mountStep7(event.detail || window.imagePrompts || []);
         });
 
         document.addEventListener('step1-complete', function (event) {

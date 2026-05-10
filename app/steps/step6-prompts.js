@@ -574,7 +574,7 @@ function createStep6Prompts(options) {
       </section>
 
       <section class="step6__section">
-        <h4 class="step6__section-title">Canva / Designer Notes</h4>
+        <h4 class="step6__section-title">Designer Notes</h4>
         <p class="step6__canva-notes">${step6EscapeHtml(state.designNote || 'No design note recorded for this module.')}</p>
       </section>
     `;
