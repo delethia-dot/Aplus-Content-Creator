@@ -156,7 +156,7 @@ const step6Styles = `
   .step6__card--ready .step6__card-chevron.expanded {
     transform: rotate(180deg);
   }
-  .step6__card-body--collapsed { display: none; }
+  .step6__card-body.step6__card-body--collapsed { display: none; }
   .step6__all-ready {
     margin: 0 0 0.5rem;
     background: var(--v-surface);
