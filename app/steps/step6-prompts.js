@@ -620,18 +620,47 @@ function createStep6Prompts(options) {
     return lines.join('\n');
   }
 
+  function setCardRateLimit(idx) {
+    const state = moduleStates[idx];
+    const card = state.cardEl;
+    if (!card) return;
+    const body = card.querySelector('[data-card-body]');
+    body.innerHTML = '';
+    const msg = document.createElement('p');
+    msg.className = 'step6__card-loading';
+    msg.textContent = 'Rate limit reached. Retrying in 5 seconds.';
+    body.appendChild(msg);
+  }
+
   async function generatePrompt(idx) {
     setCardLoading(idx);
+    const apiUrl = window.APLUS_API_URL || '/api/generate';
+    const requestBody = JSON.stringify({
+      systemPrompt: STEP6_SYSTEM_PROMPT,
+      prompt: buildUserPrompt(idx),
+    });
+    const MAX_429_RETRIES = 3;
+    const RETRY_WAIT_MS = 5000;
+
     try {
-      const apiUrl = window.APLUS_API_URL || '/api/generate';
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemPrompt: STEP6_SYSTEM_PROMPT,
-          prompt: buildUserPrompt(idx),
-        }),
-      });
+      let res;
+      let retries = 0;
+      while (true) {
+        res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: requestBody,
+        });
+        if (res.status === 429 && retries < MAX_429_RETRIES) {
+          retries++;
+          console.warn(`[step6] module ${idx + 1} hit 429, retry ${retries}/${MAX_429_RETRIES} in ${RETRY_WAIT_MS}ms`);
+          setCardRateLimit(idx);
+          await new Promise((resolve) => setTimeout(resolve, RETRY_WAIT_MS));
+          continue;
+        }
+        break;
+      }
+
       const data = await res.json().catch(() => null);
       if (!res.ok || !data || typeof data.text !== 'string' || !data.text.trim()) {
         console.error(`[step6] module ${idx + 1} non-success`, res.status, data);
@@ -694,7 +723,7 @@ function createStep6Prompts(options) {
   // Fire the 5 generations with at most 3 in flight at any time.
   // Workers pull from a shared queue; as each finishes, the worker
   // grabs the next pending module until the queue is empty.
-  const STEP6_CONCURRENCY = 3;
+  const STEP6_CONCURRENCY = 2;
   const queue = moduleStates.map((_, idx) => idx);
   async function runWorker() {
     while (queue.length > 0) {
